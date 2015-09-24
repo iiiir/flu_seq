@@ -8,15 +8,16 @@ class Virus():
 	def breakdown_strain_name(self,s):
 		''' Parse strain names'''
 		d_prov			=province_dict()
+		d_loc           =location_std()
 		d_host,d_family	=host_dict()
 		s_list			=s.strip().split('/')
 		if len(s_list) == 4 and s_list[1].lower() != "chicken":
-			self.location   =s_list[1].title()
+			self.location   =d_loc.get(s_list[1], s_list[1].title())
 			self.province	=d_prov[s_list[1]]
 			self.host		='Human'
 			self.opt_id		='/'.join(s_list[2:-1])
 		else:
-			self.location   =s_list[2].title()
+			self.location   =d_loc.get(s_list[2], s_list[2].title())
 			self.province	=d_prov[s_list[2]]
 			self.host		=d_host[s_list[1]]
 			self.opt_id		='/'.join(s_list[3:-1])
@@ -64,6 +65,15 @@ class Virus():
 			return self.strain
 
 ##------------ Manual curated dictionaries ----------##
+def location_std():
+    s='''\
+    HK:Hong Kong
+    Hong_Kong:Hong Kong
+    HongKong:Hong Kong
+    YN:Yunnan'''
+    return {l.strip().split(':')[0]:l.strip().split(':')[1]
+            for l in s.split('\n')}
+
 def province_dict():
     '''
     
@@ -241,14 +251,14 @@ def host_dict():
     Environment,Environment,Environment
     equine,Equine,mammalian
     feces,Feces,Environment
-    Gf,Guinea Fowl,wild bird
     goose,Goose,poultry
-    guinea fowl,Guinea fowl,wild bird
-    Guinea fowl,Guinea fowl,wild bird
-    guinea_fowl,Guinea fowl,wild bird
-    Guinea_fowl,Guinea fowl,wild bird
-    guineafowl,Guinea fowl,wild bird
-    GuineaFowl,Guinea fowl,wild bird
+    Gf,Guinea Fowl,wild bird
+    guinea fowl,Guinea Fowl,wild bird
+    Guinea fowl,Guinea Fowl,wild bird
+    guinea_fowl,Guinea Fowl,wild bird
+    Guinea_fowl,Guinea Fowl,wild bird
+    guineafowl,Guinea Fowl,wild bird
+    GuineaFowl,Guinea Fowl,wild bird
     homing pigeon,Homing Pigeon,poultry
     homing_pigeon,Homing Pigeon,poultry
     Human,Human,Human

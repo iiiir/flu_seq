@@ -90,7 +90,7 @@ def map_color(yy):
     else:
         return '#000000' # black
 
-def drop_duplicates(tree_file_name):
+def drop_duplicates(tree):
     '''
     tree object -> tree obj
 
@@ -98,8 +98,13 @@ def drop_duplicates(tree_file_name):
     china/beijing/1/94
     A/China/Beijing/1/1994
 
+    update: 09/14/2015
+    Now remove duplicates in such formats:
+    A/Gf/HK/NT101/2003
+    A/Guinea fowl/Hong Kong/NT101/2003
+    A/GuineaFowl/HongKong/NT101/03
+
     '''
-    tree =read_nexus_tree(tree_file_name)
     strain_party = dict()
     dups = []
     for ln in tree.leaf_nodes():
@@ -108,10 +113,8 @@ def drop_duplicates(tree_file_name):
             strain_party[v.std_name]=ln.taxon.label
         else:
             dups.append(ln.taxon.label)
-    print >> sys.stdout, '>>> %d duplicates in %s' % (len(dups), tree_file_name)
-    print >> sys.stdout, '\n'.join(dups)
     tree.prune_taxa_with_labels(dups, update_splits=True)
-    write_nexus_tree(tree, tree_file_name.replace('.tree','_dedup.tree') )
+    return tree, dups #write_nexus_tree(tree, tree_file_name.replace('.tree','_dedup.tree') )
 
 def drop_three_underscores(tree):
     for ts in tree.taxon_set:
@@ -350,6 +353,13 @@ def run_subtree(args):
     write_nexus_tree(tree,args.out_nexus)
     write_newick_tree(tree, args.out_newick)
 
+def run_dedup(args):
+    tree = read_nexus_tree(args.input_tree)
+    tree, dups = drop_duplicates(tree)
+    print >> sys.stdout, '>>> %d duplicates in %s' % (len(dups), args.input_tree)
+    print >> sys.stdout, '\n'.join(dups)
+    write_nexus_tree(tree, args.out_nexus )
+
 def main():
     if args.action == 'subtree':
         run_subtree(args)
@@ -358,7 +368,7 @@ def main():
     elif args.action == 'genotype':
         run_genotype(args)
     elif args.action == 'dedup':
-        drop_duplicates(args.input_tree)
+        run_dedup(args)
     else:
         print 'The options you provided are:\n'
         args_dict =vars(args)
