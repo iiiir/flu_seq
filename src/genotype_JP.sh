@@ -18,3 +18,9 @@ echo $cmd
 
 # HA is longer
 awk 'BEGIN{FS="\t"} $2=substr($2, 0, 1) {print $1"="$2}' ${seg}.grp > ${seg}.txt
+
+## update 100820215
+python ~/app/flu_seq/src/adhoc/geno.py -f *.grp > cx_trees.tsv
+loadR
+Rscript /home/swang/app/flu_seq/src/adhoc/geno_plot.R cx_trees.tsv
+

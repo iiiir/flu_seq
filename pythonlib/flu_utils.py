@@ -1,68 +1,76 @@
 import re
 
 class Virus():
-	def __init__(self, s):
-		self.strain =s
-		self.breakdown_strain_name(self.strain)
+    def __init__(self, s):
+        self.strain =s
+        self.breakdown_strain_name(self.strain)
 
-	def breakdown_strain_name(self,s):
-		''' Parse strain names'''
-		d_prov			=province_dict()
-		d_loc           =location_std()
-		d_host,d_family	=host_dict()
-		s_list			=s.strip().split('/')
-		if len(s_list) == 4 and s_list[1].lower() != "chicken":
-			self.location   =d_loc.get(s_list[1], s_list[1].title())
-			self.province	=d_prov[s_list[1]]
-			self.host		='Human'
-			self.opt_id		='/'.join(s_list[2:-1])
-		else:
-			self.location   =d_loc.get(s_list[2], s_list[2].title())
-			self.province	=d_prov[s_list[2]]
-			self.host		=d_host[s_list[1]]
-			self.opt_id		='/'.join(s_list[3:-1])
+    def breakdown_strain_name(self,s):
+        ''' Parse strain names'''
+        d_prov          =province_dict()
+        d_loc           =location_std()
+        d_host,d_family =host_dict()
+        s_list          =s.strip().split('/')
+        if len(s_list) == 4 and s_list[1].lower() != "chicken":
+            try:
+                self.location  =d_loc.get(s_list[1], s_list[1].title())
+                self.province  =d_prov[s_list[1]]
+                self.host      ='Human'
+                self.opt_id    ='/'.join(s_list[2:-1])
+            except:
+                print self.strain
+                raise KeyError
+        else:
+            try:
+                self.location  =d_loc.get(s_list[2], s_list[2].title())
+                self.province  =d_prov[s_list[2]]
+                self.host      =d_host[s_list[1]]
+                self.opt_id    ='/'.join(s_list[3:-1])
+            except:
+                print self.strain
+                raise KeyError
 
-	@property
-	def year(self):
-		y	=self.strain.rsplit('/',1)[-1].strip()
-		# parse year info
-		if y.isdigit():
-			return Virus.reformat_year( y )
-		elif y in ["China", "Hubei"]: # two special strains with names ended w/o year
-			return None
-		else:
-			year_pat	=r'(?<!\d)([1|2][9|0]\d{2})($|/|-|\()'
-			return int(re.search(year_pat, self.strain).group(1))
+    @property
+    def year(self):
+        y    =self.strain.rsplit('/',1)[-1].strip()
+        # parse year info
+        if y.isdigit():
+            return Virus.reformat_year( y )
+        elif y in ["China", "Hubei"]: # two special strains with names ended w/o year
+            return None
+        else:
+            year_pat    =r'(?<!\d)([1|2][9|0]\d{2})($|/|-|\()'
+            return int(re.search(year_pat, self.strain).group(1))
 
-	@staticmethod	
-	def reformat_year(y):
-		'''
-		convert year to standard format 19xx / 20xx
-		'''
-		if len(y) == 4:
-			yy=y
-		else:
-			assert len(y) == 2, "The year format is: %s"%y
-			if int(y) > 20:
-				yy='19'+y
-			else:
-				yy='20'+y
-		return int(yy)
+    @staticmethod    
+    def reformat_year(y):
+        '''
+        convert year to standard format 19xx / 20xx
+        '''
+        if len(y) == 4:
+            yy=y
+        else:
+            assert len(y) == 2, "The year format is: %s"%y
+            if int(y) > 20:
+                yy='19'+y
+            else:
+                yy='20'+y
+        return int(yy)
 
-	@property
-	def std_name(self):
-		return 'A/%s/%s/%s/%s'%(self.host, self.location, self.opt_id, self.year)
-	
-	@property
-	def name(self):
-		'''
-		Will and only will change year format to four digits
-		'''
-		l   =self.strain.rsplit('/',1)
-		if l[-1].isdigit():
-			return '%s/%d'%(l[0],Virus.reformat_year( l[-1] ))
-		else:
-			return self.strain
+    @property
+    def std_name(self):
+        return 'A/%s/%s/%s/%s'%(self.host, self.location, self.opt_id, self.year)
+    
+    @property
+    def name(self):
+        '''
+        Will and only will change year format to four digits
+        '''
+        l   =self.strain.rsplit('/',1)
+        if l[-1].isdigit():
+            return '%s/%d'%(l[0],Virus.reformat_year( l[-1] ))
+        else:
+            return self.strain
 
 ##------------ Manual curated dictionaries ----------##
 def location_std():
